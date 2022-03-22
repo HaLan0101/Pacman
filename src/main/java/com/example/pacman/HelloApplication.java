@@ -32,7 +32,7 @@ public class HelloApplication extends Application {
     static int scoreint = 0;
     int indexActiveSceneGame = 0;
     boolean gamePaused = true;
-    boolean pacManVorace = false;
+    boolean pacManVoracious = false;
     String pseudoPlayer;
 
     //set list
@@ -46,68 +46,62 @@ public class HelloApplication extends Application {
     Circle pacman;
 
     // set group
-    Group groupMenu;
-    Group groupGameInitial;
+    Group groupMenuPage;
+    Group groupGamePage;
     Group groupHighScorePage;
 
     // text score and name player
     Text score;
     Text highscores;
-    TextArea saisiePseudo;
+    TextArea inputPseudo;
 
     //set Button
     Button buttonPauseSceneGame;
     Button buttonGoToHighScorePage;
     Button buttonStartMainMenu;
-    Button buttonReturnToMenu;
+    Button buttonReturnMainMenu;
     Button buttonReturnToGameFromPause;
 
     //set Scene
     Scene sceneMenu;
     Scene sceneGameInitial;
     Scene sceneHighScorePage;
-
     VBox vboxMenu;
 
     //set Time
     Timeline tl;
     Timer timerCerise = new Timer();
+
     //set Stage
     Stage primaryStage;
 
     //Score
-    HashMap<String, Integer> highScores;
     TableView tableHighScore;
     ArrayList<Map<String, Object>> scores;
 
 
     @Override
     public void start(Stage stage) throws Exception{
-
         listScenesGame = new ArrayList<Scene>();
         listGroupGame = new ArrayList<Group>();
-
         primaryStage = stage;
         primaryStage.setTitle("Pacman");
 
-
         //SCENE MENU DEFINITION
-        groupMenu = new Group();
+        groupMenuPage = new Group();
         buttonStartMainMenu = new Button("Start new GAME!");
         buttonGoToHighScorePage = new Button("Go to highscore!");
         buttonReturnToGameFromPause = new Button("Return to game");
-        saisiePseudo = new TextArea();
-        saisiePseudo.setPrefHeight(100);
-        saisiePseudo.setPrefWidth(100);
+        inputPseudo = new TextArea();
+        inputPseudo.setPrefHeight(100);
+        inputPseudo.setPrefWidth(100);
+        groupMenuPage.setLayoutX(WIDTH/2);
+        groupMenuPage.setLayoutY(HEIGHT/2);
+        vboxMenu = new VBox(buttonStartMainMenu, buttonGoToHighScorePage, inputPseudo);
+        groupMenuPage.getChildren().add(vboxMenu);
 
 
-        groupMenu.setLayoutX(WIDTH/2);
-        groupMenu.setLayoutY(HEIGHT/2);
-        vboxMenu = new VBox(buttonStartMainMenu, buttonGoToHighScorePage, saisiePseudo);
-        groupMenu.getChildren().add(vboxMenu);
-
-
-        sceneMenu = new Scene(groupMenu, WIDTH, HEIGHT, Color.BLACK);
+        sceneMenu = new Scene(groupMenuPage, WIDTH, HEIGHT, Color.BLACK);
         Image imLaurier = new Image("https://i.gifer.com/origin/64/649852e53b7e4edf15ea1c2f23a61f29_w200.gif",false);
         sceneMenu.setFill(new ImagePattern(imLaurier));
 
@@ -119,10 +113,10 @@ public class HelloApplication extends Application {
         rContour.setFill(Color.TRANSPARENT);
         rContour.setStroke(Color.PURPLE);
         rContour.setStrokeWidth(10);
-        groupGameInitial = initializeGroupGame();
-        listGroupGame.add(groupGameInitial);
+        groupGamePage = initializeGroupGame();
+        listGroupGame.add(groupGamePage);
 
-        sceneGameInitial = new Scene(groupGameInitial, WIDTH, HEIGHT, Color.BLACK);
+        sceneGameInitial = new Scene(groupGamePage, WIDTH, HEIGHT, Color.BLACK);
         listScenesGame.add(sceneGameInitial);
 
         tl = new Timeline(new KeyFrame(Duration.millis(250), e -> run()));
@@ -132,13 +126,13 @@ public class HelloApplication extends Application {
         handleGameEvent();
 
         //HighScorePage
-        buttonReturnToMenu = new Button("Return to menu!");
+        buttonReturnMainMenu = new Button("Return to menu!");
         highscores = new Text();
         highscores.setX(200);
         highscores.setY(200);
         highscores.setFill(Color.WHITE);
         groupHighScorePage = new Group();
-        groupHighScorePage.getChildren().add(buttonReturnToMenu);
+        groupHighScorePage.getChildren().add(buttonReturnMainMenu);
         groupHighScorePage.getChildren().add(highscores);
         tableHighScore = new TableView();
         scores = new ArrayList<Map<String, Object>>();
@@ -152,23 +146,15 @@ public class HelloApplication extends Application {
         for (Map<String, Object> item:scores) {
             tableHighScore.getItems().addAll(item);
         }
-
         tableHighScore.getColumns().add(col1);
         tableHighScore.getColumns().add(col2);
-
         tableHighScore.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
         tableHighScore.setLayoutX(WIDTH/4);
         tableHighScore.setLayoutY(HEIGHT/4);
         groupHighScorePage.getChildren().add(tableHighScore);
-
         sceneHighScorePage = new Scene(groupHighScorePage, WIDTH, HEIGHT, Color.BLACK);
         sceneHighScorePage.setFill(new ImagePattern(imLaurier));
-
-
         primaryStage.show();
-
-
 
         buttonStartMainMenu.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -199,7 +185,7 @@ public class HelloApplication extends Application {
             }
         });
 
-        buttonReturnToMenu.setOnAction(new EventHandler<ActionEvent>() {
+        buttonReturnMainMenu.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 primaryStage.setScene(sceneMenu);
@@ -312,7 +298,6 @@ public class HelloApplication extends Application {
                         tl.play();
                         gamePaused = false;
                     }
-
             }
         });
 
@@ -352,6 +337,19 @@ public class HelloApplication extends Application {
         Circle ghost3 = new Circle(700, 700, 25, Color.RED);
         Circle ghost4 = new Circle(700, 700, 25, Color.RED);
         Circle ghost5 = new Circle(700, 700, 25, Color.RED);
+
+        Image im1 = new Image("https://c.tenor.com/LitM8hyiDCkAAAAM/ghost-pacman.gif",false);
+        ghost1.setFill(new ImagePattern(im1));
+        Image im2 = new Image("https://thumbs.gfycat.com/FalseScentedIzuthrush-max-1mb.gif",false);
+        ghost2.setFill(new ImagePattern(im2));
+        Image im3 = new Image("https://i.gifer.com/origin/d5/d5b9ae79f5254caaf0fdcf2affcec5b0_w200.gif",false);
+        ghost3.setFill(new ImagePattern(im3));
+        Image im4 = new Image("https://i.gifer.com/origin/50/5016760dd9f147e7a445529ed8ff40de_w200.gif",false);
+        ghost4.setFill(new ImagePattern(im4));
+        Image im5 = new Image("https://thumbs.gfycat.com/FalseScentedIzuthrush-max-1mb.gif",false);
+        ghost5.setFill(new ImagePattern(im5));
+
+
 
         listGhost = new ArrayList<Circle>();
         listGhost.add(ghost1);
@@ -424,7 +422,7 @@ public class HelloApplication extends Application {
                 }
             }
             if(ghost.getCenterX()==pacman.getCenterX() && ghost.getCenterY()==pacman.getCenterY()){
-                if(!pacManVorace) {
+                if(!pacManVoracious) {
                     tl.pause();
                     gamePaused = true;
                     addScoreToHighScore();
@@ -458,7 +456,7 @@ public class HelloApplication extends Application {
     }
 
     private void addScoreToHighScore() {
-        pseudoPlayer = saisiePseudo.getText();
+        pseudoPlayer = inputPseudo.getText();
         HashMap<String, Object> toAdd = new HashMap<>();
         toAdd.put("userName", pseudoPlayer);
         toAdd.put("score", scoreint);
@@ -483,23 +481,21 @@ public class HelloApplication extends Application {
             if(cerise.getCenterX() == pacman.getCenterX() && cerise.getCenterY() == pacman.getCenterY()){
                 pointTempToRemove = cerise;
                 group.getChildren().remove(cerise);
-                pacManVorace = true;
+                pacManVoracious = true;
                 timerCerise.schedule(task, 10000L);
-                System.out.println("pacManVorace : " + pacManVorace);
+                System.out.println("Voracious Pacman : " + pacManVoracious);
             }
         }
         if(pointTempToRemove!=null) {
             listCerises.remove(pointTempToRemove);
         }
     }
-
     TimerTask task = new TimerTask() {
         public void run() {
-            pacManVorace = false;
-            System.out.println("pacManVorace : " + pacManVorace);
+            pacManVoracious = false;
+            System.out.println("Voraciouse Pacman : " + pacManVoracious);
         }
     };
-
     public Rectangle createObstacleOnScene(int x, int y, int width, int heigth){
         Rectangle r = new Rectangle(x, y, width, heigth);
         r.setFill(Color.GREEN);
@@ -508,5 +504,4 @@ public class HelloApplication extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 }
