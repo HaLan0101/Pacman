@@ -102,7 +102,7 @@ public class HelloApplication extends Application {
 
 
         sceneMenu = new Scene(groupMenuPage, WIDTH, HEIGHT, Color.BLACK);
-        Image imLaurier = new Image("https://i.gifer.com/origin/64/649852e53b7e4edf15ea1c2f23a61f29_w200.gif",false);
+        Image imLaurier = new Image("https://i.pinimg.com/originals/68/43/cc/6843cc365df18febde115bc70eb15290.gif",false);
         sceneMenu.setFill(new ImagePattern(imLaurier));
 
         primaryStage.setScene(sceneMenu);
