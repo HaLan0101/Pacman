@@ -6,7 +6,6 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -22,69 +21,71 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
-
-import jdk.nashorn.internal.parser.JSONParser;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 
 
 public class HelloApplication extends Application {
+
+    // set value
     static final int WIDTH = 1000;
     static final int HEIGHT = 800;
     static int scoreint = 0;
-    List<Circle> listGhost;
-    Circle pacman;
-    List<Circle> listPoint;
-    Text score;
-    Button buttonPauseSceneGame;
-    Group groupMenu;
-
-    Scene sceneGameInitial;
-    List<Scene> listScenesGame;
     int indexActiveSceneGame = 0;
-
-    List<Group> listGroupGame;
-    Group groupGameInitial;
-    VBox vboxMenu;
-
-
-    Stage primaryStage;
-    Scene sceneMenu;
-    Timeline tl;
     boolean gamePaused = true;
-    Button buttonGoToHighScorePage;
-    Scene sceneHighScorePage;
+    boolean pacManVorace = false;
+    String pseudoPlayer;
+
+    //set list
+    List<Circle> listGhost;
+    List<Circle> listPoint;
+    List<Scene> listScenesGame;
+    List<Group> listGroupGame;
+    List<Circle> listCerises;
+
+    // set pacman circle form
+    Circle pacman;
+
+    // set group
+    Group groupMenu;
+    Group groupGameInitial;
     Group groupHighScorePage;
+
+    // text score and name player
+    Text score;
+    Text highscores;
+    TextArea saisiePseudo;
+
+    //set Button
+    Button buttonPauseSceneGame;
+    Button buttonGoToHighScorePage;
     Button buttonStartMainMenu;
     Button buttonReturnToMenu;
     Button buttonReturnToGameFromPause;
-    Text highscores;
-    TextArea saisiePseudo;
-    String pseudoPlayer;
-    JSONObject highScoreData;
-    List<Circle> listCerises;
 
-    ArrayList<Map<String, Object>> itemsScore;
+    //set Scene
+    Scene sceneMenu;
+    Scene sceneGameInitial;
+    Scene sceneHighScorePage;
+
+    VBox vboxMenu;
+
+    //set Time
+    Timeline tl;
     Timer timerCerise = new Timer();
+    //set Stage
+    Stage primaryStage;
 
+    //Score
     HashMap<String, Integer> highScores;
     TableView tableHighScore;
     ArrayList<Map<String, Object>> scores;
 
 
-    boolean pacManVorace = false;
-
     @Override
     public void start(Stage stage) throws Exception{
+
         listScenesGame = new ArrayList<Scene>();
         listGroupGame = new ArrayList<Group>();
-
 
         primaryStage = stage;
         primaryStage.setTitle("Pacman");
@@ -148,8 +149,6 @@ public class HelloApplication extends Application {
         TableColumn<Map, String> col2 = new TableColumn<>("score");
         col2.setCellValueFactory(new MapValueFactory<>("score"));
 
-        scores.addAll(getInfoFromFile());
-
         for (Map<String, Object> item:scores) {
             tableHighScore.getItems().addAll(item);
         }
@@ -159,10 +158,6 @@ public class HelloApplication extends Application {
 
         tableHighScore.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-      /*  VBox vBoxTableHighScore = new VBox();
-        vBoxTableHighScore.getChildren().add(tableHighScore);
-        vBoxTableHighScore.setAlignment(Pos.CENTER);
-        */
         tableHighScore.setLayoutX(WIDTH/4);
         tableHighScore.setLayoutY(HEIGHT/4);
         groupHighScorePage.getChildren().add(tableHighScore);
@@ -198,7 +193,6 @@ public class HelloApplication extends Application {
         buttonGoToHighScorePage.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                dataInHashMap();
                 primaryStage.setScene(sceneHighScorePage);
                 gamePaused = true;
                 tl.pause();
@@ -220,12 +214,10 @@ public class HelloApplication extends Application {
             if (event.getText().isEmpty())
                 return;
             char keyEntered = event.getText().toUpperCase().charAt(0);
-
             boolean isMouvOk = !gamePaused;
             switch (keyEntered){
                 case 'Z' :
                     pacman.setRotate(-90);
-
                     for (Node node : listGroupGame.get(indexActiveSceneGame).getChildren()) {
                         if( node instanceof Rectangle){
                             Rectangle r = ((Rectangle) node);
@@ -240,15 +232,12 @@ public class HelloApplication extends Application {
                         if (pacman.getCenterY() <= 0) {
                             pacman.setCenterY(HEIGHT + pacman.getRadius());
                         }
-
                         isNextPositionAPoint(listGroupGame.get(indexActiveSceneGame), listPoint, pacman, score);
                         pacman.setCenterY(pacman.getCenterY() - pacman.getRadius());
                     }
                     break;
                 case 'S' :
                     pacman.setRotate(90);
-
-                    //isMouvOk = true;
                     for (Node node : listGroupGame.get(indexActiveSceneGame).getChildren()) {
                         if( node instanceof Rectangle){
                             Rectangle r = ((Rectangle) node);
@@ -271,8 +260,6 @@ public class HelloApplication extends Application {
                     break;
                 case 'Q' :
                     pacman.setRotate(180);
-
-                    //isMouvOk = true;
                     for (Node node : listGroupGame.get(indexActiveSceneGame).getChildren()) {
                         if( node instanceof Rectangle){
                             Rectangle r = ((Rectangle) node);
@@ -294,8 +281,6 @@ public class HelloApplication extends Application {
                     break;
                 case 'D' :
                     pacman.setRotate(0);
-
-                    //isMouvOk = true;
                     for (Node node : listGroupGame.get(indexActiveSceneGame).getChildren()) {
                         if( node instanceof Rectangle){
                             Rectangle r = ((Rectangle) node);
@@ -358,7 +343,6 @@ public class HelloApplication extends Application {
         group.getChildren().add(score);
 
         pacman = new Circle(WIDTH/2,50, 25);
-        // Image im = new Image("https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Pacman.svg/1200px-Pacman.svg.png",false);
         Image im = new Image("https://i.gifer.com/origin/64/649852e53b7e4edf15ea1c2f23a61f29_w200.gif",false);
         pacman.setFill(new ImagePattern(im));
         group.getChildren().add(pacman);
@@ -386,32 +370,7 @@ public class HelloApplication extends Application {
         group.getChildren().add(cerise);
         listCerises = new ArrayList<>();
         listCerises.add(cerise);
-
         listPoint = new ArrayList<Circle>();
-       /* for(int i = 50; i < HEIGHT; i = i + 50){
-            for(int j = 50; j < WIDTH; j = j + 50){
-                boolean createOk = true;
-
-                for (Node node : group.getChildren()) {
-                    if (node instanceof Rectangle) {
-                        Rectangle r = ((Rectangle) node);
-                        if (j > r.getX() -1 && j < r.getX()+r.getWidth()+1){
-                            if  ( i>r.getY()-1 && i<r.getY()+r.getHeight()+1){
-                                createOk = false;
-                            }
-                        }
-                    }
-                }
-                if(createOk){
-                    Circle point = new Circle(j, i, 10, Color.GAINSBORO);
-                    listPoint.add(point);
-                }
-            }
-        }*/
-
-      /*  for (Circle p : listPoint) {
-            group.getChildren().add(p);
-        }*/
         Circle point = new Circle(50, 50, 10, Color.GAINSBORO);
         listPoint.add(point);
         group.getChildren().add(listPoint.get(0));
@@ -428,7 +387,6 @@ public class HelloApplication extends Application {
                     Math.abs(ghost.getCenterY() - pacman.getCenterY())) < 500) {
                 chaseOn = true;
             }
-
             if(chaseOn){
                 double difX = ghost.getCenterX() - pacman.getCenterX();
                 double difY = ghost.getCenterY() - pacman.getCenterY();
@@ -466,11 +424,9 @@ public class HelloApplication extends Application {
                 }
             }
             if(ghost.getCenterX()==pacman.getCenterX() && ghost.getCenterY()==pacman.getCenterY()){
-
                 if(!pacManVorace) {
                     tl.pause();
                     gamePaused = true;
-                    //highscores.setText(pseudoPlayer + " " + scoreint);
                     addScoreToHighScore();
 
                     primaryStage.setScene(sceneHighScorePage);
@@ -479,7 +435,6 @@ public class HelloApplication extends Application {
                 }
                 else{
                     scoreint = scoreint + 10;
-                    // groupGame.getChildren().
                     score.setText(String.valueOf(scoreint));
                     listGroupGame.get(indexActiveSceneGame).getChildren().remove(ghost);
                     tempGhostToRemove = ghost;
@@ -489,17 +444,11 @@ public class HelloApplication extends Application {
         if(tempGhostToRemove != null){
             listGhost.remove(tempGhostToRemove);
         }
-
-
         if(listPoint.size() == 0){
             System.out.println("Bravo!");
-            // tl.pause();
-            //  gamePaused = true;
             addScoreToHighScore();
-
             indexActiveSceneGame++;
             listGroupGame.add(initializeGroupGame());
-
             listScenesGame.add(new Scene(listGroupGame.get(indexActiveSceneGame), WIDTH, HEIGHT, Color.BLACK));
             primaryStage.setScene(listScenesGame.get(indexActiveSceneGame));
             gamePaused = false;
@@ -515,8 +464,6 @@ public class HelloApplication extends Application {
         toAdd.put("score", scoreint);
         scores.add(toAdd);
         tableHighScore.getItems().add(toAdd);
-
-
     }
 
     private void isNextPositionAPoint(Group group, List<Circle> listPoint, Circle pacman, Text score) {
@@ -558,89 +505,8 @@ public class HelloApplication extends Application {
         r.setFill(Color.GREEN);
         return r;
     }
-
-    public boolean isMouvementAllowed(Group group, Circle pacman){
-        for (Node node : group.getChildren()) {
-            // node.getLayoutY()
-        }
-
-        return false;
-    }
-
-
-
-
-
-
-
-    /*public void writeHighScoreToFile(){
-
-        JSONObject employeeDetails = new JSONObject();
-        employeeDetails.put("firstName", "Lokesh");
-        employeeDetails.put("lastName", "Gupta");
-        employeeDetails.put("website", "howtodoinjava.com");
-
-        JSONObject employeeObject = new JSONObject();
-        employeeObject.put("employee", employeeDetails);
-
-        //Add employees to list
-        JSONArray employeeList = new JSONArray();
-        employeeList.add(employeeObject);
-        employeeList.add(employeeObject2);
-
-        //Write JSON file
-        try (FileWriter file = new FileWriter("./highscores.json")) {
-            file.write(employeeList.toJSONString());
-            file.flush();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-*/
-
-    public ArrayList<Map<String, Object>> getInfoFromFile()  {
-      /*  highScoreData = new JSONObject();
-        highScoreData.put("userName", "foo");
-        highScoreData.put("score", new Integer(100));
-
-        System.out.println(highScoreData);
-*/
-
-        Map<String, Object> item1 = new HashMap<>();
-        item1.put("userName", "test1");
-        item1.put("score", 2000);
-
-        Map<String, Object> item2 = new HashMap<>();
-        item2.put("userName", "test2");
-        item2.put("score", 10000);
-
-        ArrayList<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
-        items.add(item1);
-        items.add(item2);
-
-        return items;
-    }
-
-    public void dataInHashMap(){
-        highScores = new HashMap<String, Integer>();
-        highScores.put("Joueur1", 50);
-        highScores.put("Joueur2", 40);
-        highScores.put("Joueur3", 60);
-
-    }
-
     public static void main(String[] args) {
-
-        ecritureTest();
-
         launch(args);
-    }
-
-    private static void ecritureTest() {
-
-
-
     }
 
 }
