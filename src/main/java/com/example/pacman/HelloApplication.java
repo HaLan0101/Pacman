@@ -6,6 +6,7 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -34,8 +35,6 @@ import org.json.simple.JSONObject;
 
 
 public class HelloApplication extends Application {
-
-
     static final int WIDTH = 1000;
     static final int HEIGHT = 800;
     static int scoreint = 0;
@@ -43,7 +42,7 @@ public class HelloApplication extends Application {
     Circle pacman;
     List<Circle> listPoint;
     Text score;
-    Button buttonPause;
+    Button buttonPauseSceneGame;
     Scene sceneGame;
     Group groupGame;
     Stage primaryStage;
@@ -53,8 +52,9 @@ public class HelloApplication extends Application {
     Button buttonGoToHighScorePage;
     Scene sceneHighScorePage;
     Group groupHighScorePage;
-    Button buttonStart;
+    Button buttonStartMainMenu;
     Button buttonReturnToMenu;
+    Button buttonReturnToGameFromPause;
     Text highscores;
     TextArea saisiePseudo;
     String pseudoPlayer;
@@ -79,8 +79,9 @@ public class HelloApplication extends Application {
 
         //SCENE MENU DEFINITION
         Group groupMenu = new Group();
-        buttonStart = new Button("Start The GAME!");
+        buttonStartMainMenu = new Button("Start new GAME!");
         buttonGoToHighScorePage = new Button("Go to highscore!");
+        buttonReturnToGameFromPause = new Button("Return to game");
         saisiePseudo = new TextArea();
         saisiePseudo.setPrefHeight(100);
         saisiePseudo.setPrefWidth(100);
@@ -88,8 +89,8 @@ public class HelloApplication extends Application {
 
         groupMenu.setLayoutX(WIDTH/2);
         groupMenu.setLayoutY(HEIGHT/2);
-        VBox vbox = new VBox(buttonStart, buttonGoToHighScorePage, saisiePseudo);
-        groupMenu.getChildren().add(vbox);
+        VBox vboxMenu = new VBox(buttonStartMainMenu, buttonGoToHighScorePage, saisiePseudo);
+        groupMenu.getChildren().add(vboxMenu);
 
 
         sceneMenu = new Scene(groupMenu, WIDTH, HEIGHT, Color.BLACK);
@@ -99,7 +100,6 @@ public class HelloApplication extends Application {
         //SCENE GAME DEFINITION
         Rectangle rContour = new Rectangle(0,0 ,WIDTH,HEIGHT);
         rContour.setFill(Color.TRANSPARENT);
-        //Définir la couleur du trait
         rContour.setStroke(Color.PURPLE);
         rContour.setStrokeWidth(10);
         groupGame = initializeGroupGame();
@@ -139,27 +139,47 @@ public class HelloApplication extends Application {
         tableHighScore.getColumns().add(col1);
         tableHighScore.getColumns().add(col2);
 
+        tableHighScore.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+      /*  VBox vBoxTableHighScore = new VBox();
+        vBoxTableHighScore.getChildren().add(tableHighScore);
+        vBoxTableHighScore.setAlignment(Pos.CENTER);
+        */
+        tableHighScore.setLayoutX(WIDTH/4);
+        tableHighScore.setLayoutY(HEIGHT/4);
         groupHighScorePage.getChildren().add(tableHighScore);
 
         sceneHighScorePage = new Scene(groupHighScorePage, WIDTH, HEIGHT, Color.BLACK);
 
         primaryStage.show();
 
-        buttonPause.setOnAction(new EventHandler<ActionEvent>() {
+        buttonPauseSceneGame.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 primaryStage.setScene(sceneMenu);
+                gamePaused = true;
+                tl.pause();
+                vboxMenu.getChildren().add(buttonReturnToGameFromPause);
             }
         });
 
-        buttonStart.setOnAction(new EventHandler<ActionEvent>() {
+        buttonStartMainMenu.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                //TODO init game scene
+                primaryStage.setScene(sceneGame);
+                gamePaused = false;
+                tl.play();
+            }
+        });
+
+        buttonReturnToGameFromPause.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 primaryStage.setScene(sceneGame);
                 gamePaused = false;
-
                 tl.play();
-
+                vboxMenu.getChildren().remove(buttonReturnToGameFromPause);
             }
         });
 
@@ -167,9 +187,9 @@ public class HelloApplication extends Application {
             @Override
             public void handle(ActionEvent event) {
                 dataInHashMap();
-
-
                 primaryStage.setScene(sceneHighScorePage);
+                gamePaused = true;
+                tl.pause();
             }
         });
 
@@ -177,6 +197,8 @@ public class HelloApplication extends Application {
             @Override
             public void handle(ActionEvent event) {
                 primaryStage.setScene(sceneMenu);
+                gamePaused = true;
+                tl.pause();
             }
         });
     }
@@ -306,8 +328,8 @@ public class HelloApplication extends Application {
         group.getChildren().add(createObstacleOnScene(800,600, 100, 100));
         group.getChildren().add(createObstacleOnScene(400, 300, 200, 200));
 
-        buttonPause = new Button("Pause The GAME!");
-        group.getChildren().add(buttonPause);
+        buttonPauseSceneGame = new Button("Pause The GAME!");
+        group.getChildren().add(buttonPauseSceneGame);
 
         score = new Text(WIDTH - 50,25, String.valueOf(scoreint));
         score.setFill(Color.WHITE);
@@ -515,6 +537,11 @@ public class HelloApplication extends Application {
     }
 
 
+
+
+
+
+
     /*public void writeHighScoreToFile(){
 
         JSONObject employeeDetails = new JSONObject();
@@ -575,10 +602,13 @@ public class HelloApplication extends Application {
     public static void main(String[] args) {
 
         ecritureTest();
+
         launch(args);
     }
 
     private static void ecritureTest() {
+
+
 
     }
 
