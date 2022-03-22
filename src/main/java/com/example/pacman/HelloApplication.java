@@ -43,8 +43,17 @@ public class HelloApplication extends Application {
     List<Circle> listPoint;
     Text score;
     Button buttonPauseSceneGame;
-    Scene sceneGame;
-    Group groupGame;
+    Group groupMenu;
+
+    Scene sceneGameInitial;
+    List<Scene> listScenesGame;
+    int indexActiveSceneGame = 0;
+
+    List<Group> listGroupGame;
+    Group groupGameInitial;
+    VBox vboxMenu;
+
+
     Stage primaryStage;
     Scene sceneMenu;
     Timeline tl;
@@ -73,12 +82,16 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception{
+        listScenesGame = new ArrayList<Scene>();
+        listGroupGame = new ArrayList<Group>();
+
+
         primaryStage = stage;
         primaryStage.setTitle("Pacman");
 
 
         //SCENE MENU DEFINITION
-        Group groupMenu = new Group();
+        groupMenu = new Group();
         buttonStartMainMenu = new Button("Start new GAME!");
         buttonGoToHighScorePage = new Button("Go to highscore!");
         buttonReturnToGameFromPause = new Button("Return to game");
@@ -89,11 +102,14 @@ public class HelloApplication extends Application {
 
         groupMenu.setLayoutX(WIDTH/2);
         groupMenu.setLayoutY(HEIGHT/2);
-        VBox vboxMenu = new VBox(buttonStartMainMenu, buttonGoToHighScorePage, saisiePseudo);
+        vboxMenu = new VBox(buttonStartMainMenu, buttonGoToHighScorePage, saisiePseudo);
         groupMenu.getChildren().add(vboxMenu);
 
 
         sceneMenu = new Scene(groupMenu, WIDTH, HEIGHT, Color.BLACK);
+        Image imLaurier = new Image("https://i.gifer.com/origin/64/649852e53b7e4edf15ea1c2f23a61f29_w200.gif",false);
+        sceneMenu.setFill(new ImagePattern(imLaurier));
+
         primaryStage.setScene(sceneMenu);
         //END SCENE MENU DEFINITION
 
@@ -102,9 +118,11 @@ public class HelloApplication extends Application {
         rContour.setFill(Color.TRANSPARENT);
         rContour.setStroke(Color.PURPLE);
         rContour.setStrokeWidth(10);
-        groupGame = initializeGroupGame();
+        groupGameInitial = initializeGroupGame();
+        listGroupGame.add(groupGameInitial);
 
-        sceneGame = new Scene(groupGame, WIDTH, HEIGHT, Color.BLACK);
+        sceneGameInitial = new Scene(groupGameInitial, WIDTH, HEIGHT, Color.BLACK);
+        listScenesGame.add(sceneGameInitial);
 
         tl = new Timeline(new KeyFrame(Duration.millis(250), e -> run()));
         tl.setCycleCount(Timeline.INDEFINITE);
@@ -150,24 +168,18 @@ public class HelloApplication extends Application {
         groupHighScorePage.getChildren().add(tableHighScore);
 
         sceneHighScorePage = new Scene(groupHighScorePage, WIDTH, HEIGHT, Color.BLACK);
+        sceneHighScorePage.setFill(new ImagePattern(imLaurier));
+
 
         primaryStage.show();
 
-        buttonPauseSceneGame.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                primaryStage.setScene(sceneMenu);
-                gamePaused = true;
-                tl.pause();
-                vboxMenu.getChildren().add(buttonReturnToGameFromPause);
-            }
-        });
+
 
         buttonStartMainMenu.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 //TODO init game scene
-                primaryStage.setScene(sceneGame);
+                primaryStage.setScene(listScenesGame.get(indexActiveSceneGame));
                 gamePaused = false;
                 tl.play();
             }
@@ -176,7 +188,7 @@ public class HelloApplication extends Application {
         buttonReturnToGameFromPause.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                primaryStage.setScene(sceneGame);
+                primaryStage.setScene(listScenesGame.get(indexActiveSceneGame));
                 gamePaused = false;
                 tl.play();
                 vboxMenu.getChildren().remove(buttonReturnToGameFromPause);
@@ -204,7 +216,7 @@ public class HelloApplication extends Application {
     }
 
     private void handleGameEvent() {
-        sceneGame.setOnKeyPressed((KeyEvent event) -> {
+        listScenesGame.get(indexActiveSceneGame).setOnKeyPressed((KeyEvent event) -> {
             if (event.getText().isEmpty())
                 return;
             char keyEntered = event.getText().toUpperCase().charAt(0);
@@ -214,7 +226,7 @@ public class HelloApplication extends Application {
                 case 'Z' :
                     pacman.setRotate(-90);
 
-                    for (Node node : groupGame.getChildren()) {
+                    for (Node node : listGroupGame.get(indexActiveSceneGame).getChildren()) {
                         if( node instanceof Rectangle){
                             Rectangle r = ((Rectangle) node);
                             if((pacman.getCenterX()>= r.getX() && pacman.getCenterX()<=r.getX()+r.getWidth())){
@@ -229,7 +241,7 @@ public class HelloApplication extends Application {
                             pacman.setCenterY(HEIGHT + pacman.getRadius());
                         }
 
-                        isNextPositionAPoint(groupGame, listPoint, pacman, score);
+                        isNextPositionAPoint(listGroupGame.get(indexActiveSceneGame), listPoint, pacman, score);
                         pacman.setCenterY(pacman.getCenterY() - pacman.getRadius());
                     }
                     break;
@@ -237,7 +249,7 @@ public class HelloApplication extends Application {
                     pacman.setRotate(90);
 
                     //isMouvOk = true;
-                    for (Node node : groupGame.getChildren()) {
+                    for (Node node : listGroupGame.get(indexActiveSceneGame).getChildren()) {
                         if( node instanceof Rectangle){
                             Rectangle r = ((Rectangle) node);
                             if((pacman.getCenterX()>= r.getX() && pacman.getCenterX()<=r.getX()+r.getWidth())){
@@ -253,7 +265,7 @@ public class HelloApplication extends Application {
                         if (pacman.getCenterY() >= HEIGHT) {
                             pacman.setCenterY(0 - pacman.getRadius());
                         }
-                        isNextPositionAPoint(groupGame, listPoint, pacman, score);
+                        isNextPositionAPoint(listGroupGame.get(indexActiveSceneGame), listPoint, pacman, score);
                         pacman.setCenterY(pacman.getCenterY() + pacman.getRadius());
                     }
                     break;
@@ -261,7 +273,7 @@ public class HelloApplication extends Application {
                     pacman.setRotate(180);
 
                     //isMouvOk = true;
-                    for (Node node : groupGame.getChildren()) {
+                    for (Node node : listGroupGame.get(indexActiveSceneGame).getChildren()) {
                         if( node instanceof Rectangle){
                             Rectangle r = ((Rectangle) node);
                             if(pacman.getCenterY() <= r.getY() + r.getHeight() &&
@@ -276,7 +288,7 @@ public class HelloApplication extends Application {
                         if (pacman.getCenterX() <= 0) {
                             pacman.setCenterX(WIDTH + pacman.getRadius());
                         }
-                        isNextPositionAPoint(groupGame, listPoint, pacman, score);
+                        isNextPositionAPoint(listGroupGame.get(indexActiveSceneGame), listPoint, pacman, score);
                         pacman.setCenterX(pacman.getCenterX() - pacman.getRadius());
                     }
                     break;
@@ -284,7 +296,7 @@ public class HelloApplication extends Application {
                     pacman.setRotate(0);
 
                     //isMouvOk = true;
-                    for (Node node : groupGame.getChildren()) {
+                    for (Node node : listGroupGame.get(indexActiveSceneGame).getChildren()) {
                         if( node instanceof Rectangle){
                             Rectangle r = ((Rectangle) node);
                             if(pacman.getCenterY() <= r.getY() + r.getHeight() &&
@@ -299,7 +311,7 @@ public class HelloApplication extends Application {
                         if (pacman.getCenterX() >= WIDTH) {
                             pacman.setCenterX(0 - pacman.getRadius());
                         }
-                        isNextPositionAPoint(groupGame, listPoint, pacman, score);
+                        isNextPositionAPoint(listGroupGame.get(indexActiveSceneGame), listPoint, pacman, score);
                         pacman.setCenterX(pacman.getCenterX() + pacman.getRadius());
                     }
                     break;
@@ -316,6 +328,16 @@ public class HelloApplication extends Application {
                         gamePaused = false;
                     }
 
+            }
+        });
+
+        buttonPauseSceneGame.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(sceneMenu);
+                gamePaused = true;
+                tl.pause();
+                vboxMenu.getChildren().add(buttonReturnToGameFromPause);
             }
         });
     }
@@ -448,7 +470,7 @@ public class HelloApplication extends Application {
                 if(!pacManVorace) {
                     tl.pause();
                     gamePaused = true;
-                    highscores.setText(pseudoPlayer + " " + scoreint);
+                    //highscores.setText(pseudoPlayer + " " + scoreint);
                     addScoreToHighScore();
 
                     primaryStage.setScene(sceneHighScorePage);
@@ -459,7 +481,7 @@ public class HelloApplication extends Application {
                     scoreint = scoreint + 10;
                     // groupGame.getChildren().
                     score.setText(String.valueOf(scoreint));
-                    groupGame.getChildren().remove(ghost);
+                    listGroupGame.get(indexActiveSceneGame).getChildren().remove(ghost);
                     tempGhostToRemove = ghost;
                 }
             }
@@ -471,10 +493,18 @@ public class HelloApplication extends Application {
 
         if(listPoint.size() == 0){
             System.out.println("Bravo!");
-            tl.pause();
-            gamePaused = true;
+            // tl.pause();
+            //  gamePaused = true;
             addScoreToHighScore();
-            primaryStage.setScene(sceneHighScorePage);
+
+            indexActiveSceneGame++;
+            listGroupGame.add(initializeGroupGame());
+
+            listScenesGame.add(new Scene(listGroupGame.get(indexActiveSceneGame), WIDTH, HEIGHT, Color.BLACK));
+            primaryStage.setScene(listScenesGame.get(indexActiveSceneGame));
+            gamePaused = false;
+            tl.play();
+            handleGameEvent();
         }
     }
 
@@ -515,6 +545,7 @@ public class HelloApplication extends Application {
             listCerises.remove(pointTempToRemove);
         }
     }
+
     TimerTask task = new TimerTask() {
         public void run() {
             pacManVorace = false;
